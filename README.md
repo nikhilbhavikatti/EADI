@@ -62,10 +62,50 @@ External references: LaMa (GAN lower bound) and OmniEraser (large-scale diffusio
 
 ---
 
-
-
 ## Dataset
+
 The dataset is publicly available on Kaggle: [VEAORWTGDI Dataset](https://www.kaggle.com/datasets/nikhilbhavikatti19/veaorwtgdi-dataset).
+
+### Dataset Format
+
+Each image entry is identified by a video ID and frame index, stored as flat files directly inside each split folder using the naming convention:
+
+```
+VXXX_YYYYY_B.jpg   ← Clean background frame (object-absent)
+VXXX_YYYYY_I.jpg   ← Object-present frame (input)
+VXXX_YYYYY_O.png   ← Binary object mask (SAM 2.1, Hiera-Large)
+VXXX_YYYYY_S.png   ← Binary shadow mask (YCrCb luminance difference)
+```
+
+Where `XXX` is the video ID and `YYYYY` is the zero-padded frame index.
+
+The dataset is organised into the following top-level folders:
+
+```
+dataset/
+├── Train/             # 80 videos — flat files (B, I, O, S)
+├── Validation/        # 10 videos — flat files (B, I, O, S)
+├── Test/              # 10 videos — flat files (B, I, O, S)
+├── Train_extra/       # Extra 40 videos — flat files (B, I, O, S)
+├── COMPLETE_TEST/     # Same as Test + combined mask per entry
+│                      #   VXXX_YYYYY_C.png ← Combined mask (OR of O + S, 5-iter dilated)
+└── cropped_shadow_patches/    # Cropped shadow patches used for Textual Inversion token training
+```
+
+**Key properties:**
+
+| Property | Value |
+|---|---|
+| Total videos | 140 (100 base + 40 extra) |
+| Train / Val / Test split | 80 / 10 / 10 (video-level, no background leakage) |
+| Train Extra | 40 additional videos |
+| Total test image pairs | 2,111 |
+| Frame format | JPEG (near-lossless), zero-indexed frame IDs |
+| Object segmentation | SAM 2.1 Hiera-Large (single click per video, propagated) |
+| Shadow detection | YCrCb brightness ratio with per-video `r_max` threshold |
+| Annotation types | Background (B), Input (I), Object mask (O), Shadow mask (S), Combined mask (C) |
+| Combined mask availability | COMPLETE_TEST folder only |
+| Scene types | Indoor (self-recorded, controlled lighting) + Outdoor (stock footage) |
 
 ---
 
@@ -89,4 +129,4 @@ If you use this work, please cite:
 
 ## Acknowledgements
 
-This thesis was supervised by Xuening Tian, M.Sc., and examined by Prof. Dr. Dieter Schmalstieg at the Institute for Visualization and Interactive Systems (VIS), University of Stuttgart. The fine-tuning training protocol follows [ObjectDrop (Winter et al., 2024)](https://objectdrop.github.io/). Shadow token learning follows [Textual Inversion (Gal et al., 2022)](https://textual-inversion.github.io/).
+This thesis was supervised by [Xuening Tian, M.Sc.](https://xueningtian.github.io/), and examined by [Prof. Dr. Dieter Schmalstieg](https://schmalstieg.github.io/) at the Institute for Visualization and Interactive Systems (VIS), University of Stuttgart. The fine-tuning training protocol follows [ObjectDrop (Winter et al., 2024)](https://objectdrop.github.io/). Shadow token learning follows [Textual Inversion (Gal et al., 2022)](https://textual-inversion.github.io/).
